@@ -1,3 +1,4 @@
+import 'package:cross_git_browser/FollowingList.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'ProfileHeader.dart';
@@ -26,7 +27,11 @@ class HomePage extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                   fontSize: 25.0,
                 ),
-              )
+              ),
+              SizedBox(
+                child: FollowingList(username),
+                height: 150.0,
+              ),
             ],
           ),
         ));

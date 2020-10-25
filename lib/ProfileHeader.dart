@@ -1,8 +1,6 @@
 import 'package:cross_git_browser/Url.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'Connector.dart';
-import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
@@ -80,7 +78,6 @@ class _ProfileHeaderState extends State<ProfileHeader> {
         headers: {"Accept": "application/json"});
     setState(() {
       resBody = json.decode(res.body);
-      print(res.body);
       loading = false;
     });
 

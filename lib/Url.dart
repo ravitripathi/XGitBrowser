@@ -15,11 +15,7 @@ class Url {
     return getURL() + "/starred";
   }
 
-  String getFollowers() {
-    return getURL() + "/Follwers";
-  }
-
-  String getFollowingURL() {
-    return getURL() + "/Following";
+  String getFollowing() {
+    return getURL() + "/following";
   }
 }
