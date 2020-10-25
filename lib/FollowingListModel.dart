@@ -20,9 +20,4 @@ class FollowingListModel {
         json['following_url'] as String,
         json['repos_url'] as String);
   }
-  //
-  // @override
-  // String toString() {
-  //   return '{ ${this.name}, ${this.age} }';
-  // }
 }

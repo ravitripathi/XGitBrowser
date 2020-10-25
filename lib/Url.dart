@@ -18,4 +18,8 @@ class Url {
   String getFollowing() {
     return getURL() + "/following";
   }
+
+  String getRepos() {
+    return getURL() + "/repos";
+  }
 }
