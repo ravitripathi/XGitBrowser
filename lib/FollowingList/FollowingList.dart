@@ -1,13 +1,16 @@
-import 'package:cross_git_browser/FollowingListModel.dart';
+import 'FollowingListModel.dart';
+import 'FollowingItemWidget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'Url.dart';
+import '../Url.dart';
 
 class FollowingList extends StatefulWidget {
   final String username;
-  FollowingList(this.username);
+  final Function(String) notifyParent;
+  String selectedUsername;
+  FollowingList(this.username, this.notifyParent, this.selectedUsername);
 
   @override
   _FollowingListState createState() => _FollowingListState();
@@ -16,6 +19,7 @@ class FollowingList extends StatefulWidget {
 class _FollowingListState extends State<FollowingList> {
   List<FollowingListModel> followingList = [];
   bool loading = false;
+  FollowingListModel selectedItem;
 
   @override
   Widget build(BuildContext context) {
@@ -29,18 +33,33 @@ class _FollowingListState extends State<FollowingList> {
       itemBuilder: (context, index) {
         final item = followingList[index];
 
-        return FollowingListItem(item: item);
+        return GestureDetector(
+          child: FollowingItemWidget(
+            item: item,
+            isSelected: (item == selectedItem),
+          ),
+          onTap: () {
+            setState(() {
+              this.selectedItem = item;
+              widget.notifyParent(item.login);
+            });
+          },
+        );
       },
     ));
+  }
+
+  void resetSelected() {
+    this.selectedItem = null;
   }
 
   @override
   void initState() {
     super.initState();
-    getFollowers();
+    getFollowing();
   }
 
-  void getFollowers() async {
+  void getFollowing() async {
     String urlString = Url(this.widget.username).getFollowing();
     var res = await http.get(Uri.encodeFull(urlString),
         headers: {"Accept": "application/json"});
@@ -53,44 +72,5 @@ class _FollowingListState extends State<FollowingList> {
     });
 
     // Connector().get()
-  }
-}
-
-class FollowingListItem extends StatelessWidget {
-  const FollowingListItem({
-    Key key,
-    @required this.item,
-  }) : super(key: key);
-
-  final FollowingListModel item;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {},
-      child: SizedBox(
-        width: 150.0,
-        height: 150.0,
-        child: Card(
-          child: Column(
-            children: [
-              Container(
-                margin: EdgeInsets.all(10.0),
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.white, width: 4.0),
-                  boxShadow: [BoxShadow(blurRadius: 4.0)],
-                  borderRadius: BorderRadius.all(Radius.circular(50.0)),
-                  image: DecorationImage(
-                      image: NetworkImage(item.avatar_url), fit: BoxFit.fill),
-                ),
-              ),
-              Text(item.login),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }

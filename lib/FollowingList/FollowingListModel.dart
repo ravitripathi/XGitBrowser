@@ -6,6 +6,7 @@ class FollowingListModel {
   String followers_url;
   String following_url;
   String repos_url;
+  bool isSelected = false;
 
   FollowingListModel(this.login, this.id, this.avatar_url, this.html_url,
       this.followers_url, this.following_url, this.repos_url);

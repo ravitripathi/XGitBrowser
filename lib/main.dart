@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: LandingPage(title: 'Cross Github Browser'),
+      home: LandingPage(title: 'XGitBrowser'),
     );
   }
 }
@@ -56,6 +56,7 @@ class _LandingPageState extends State<LandingPage> {
                 onChanged: (String newText) {
                   username = newText;
                 },
+                autocorrect: false,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
                 ),

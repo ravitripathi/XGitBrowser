@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'Url.dart';
+import '../Url.dart';
 import 'RepoListModel.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'RepoItemWidget.dart';
 
 class RepoList extends StatefulWidget {
   final String username;
@@ -59,6 +59,14 @@ class _RepoListState extends State<RepoList> {
   @override
   void initState() {
     super.initState();
+    repoList = [];
+    getRepos();
+  }
+
+  @override
+  void didUpdateWidget(covariant RepoList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    repoList = [];
     getRepos();
   }
 
@@ -72,44 +80,5 @@ class _RepoListState extends State<RepoList> {
       print(res.body);
       loading = false;
     });
-  }
-}
-
-class RepoItemWidget extends StatelessWidget {
-  const RepoItemWidget({
-    Key key,
-    @required this.item,
-  }) : super(key: key);
-
-  final RepoListModel item;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(4.0),
-            child: Card(
-                shadowColor: Colors.black87,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(item.name,
-                          style: GoogleFonts.roboto(
-                            fontSize: 18.0,
-                            fontWeight: FontWeight.bold,
-                          )),
-                      Text(item.description ?? "No Description"),
-                      Text("Language: ${item.language}"),
-                    ],
-                  ),
-                )),
-          ),
-        )
-      ],
-    );
   }
 }
