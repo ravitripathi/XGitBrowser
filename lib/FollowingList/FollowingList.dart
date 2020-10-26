@@ -5,6 +5,7 @@ import 'package:flutter/rendering.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../Url.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class FollowingList extends StatefulWidget {
   final String username;
@@ -20,6 +21,7 @@ class _FollowingListState extends State<FollowingList> {
   List<FollowingListModel> followingList = [];
   bool loading = false;
   FollowingListModel selectedItem;
+  String passedUsername;
 
   @override
   Widget build(BuildContext context) {
@@ -49,14 +51,25 @@ class _FollowingListState extends State<FollowingList> {
     ));
   }
 
-  void resetSelected() {
-    this.selectedItem = null;
+  @override
+  void didUpdateWidget(covariant FollowingList oldWidget) {
+    passedUsername = widget.selectedUsername;
+    super.didUpdateWidget(oldWidget);
+    getUsername().then((value) => {
+          if (value == passedUsername)
+            {
+              setState(() {
+                this.selectedItem = null;
+              })
+            }
+        });
   }
 
   @override
   void initState() {
     super.initState();
     getFollowing();
+    passedUsername = widget.selectedUsername;
   }
 
   void getFollowing() async {
@@ -72,5 +85,10 @@ class _FollowingListState extends State<FollowingList> {
     });
 
     // Connector().get()
+  }
+
+  Future<String> getUsername() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('username');
   }
 }
