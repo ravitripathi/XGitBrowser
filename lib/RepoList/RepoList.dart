@@ -20,22 +20,25 @@ class _RepoListState extends State<RepoList> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        child: ListView.builder(
-      // Let the ListView know how many items it needs to build.
-      itemCount: repoList.length,
-      // Provide a builder function. This is where the magic happens.
-      // Convert each item into a widget based on the type of item it is.
-      itemBuilder: (context, index) {
-        final item = repoList[index];
+    return Stack(children: [
+      Center(child: loading ? CircularProgressIndicator() : null),
+      Container(
+          child: ListView.builder(
+        // Let the ListView know how many items it needs to build.
+        itemCount: repoList.length,
+        // Provide a builder function. This is where the magic happens.
+        // Convert each item into a widget based on the type of item it is.
+        itemBuilder: (context, index) {
+          final item = repoList[index];
 
-        return GestureDetector(
-            onTap: () {
-              openLink(item.html_url);
-            },
-            child: RepoItemWidget(item: item));
-      },
-    ));
+          return GestureDetector(
+              onTap: () {
+                openLink(item.html_url);
+              },
+              child: RepoItemWidget(item: item));
+        },
+      )),
+    ]);
   }
 
   void openLink(String urlString) {
@@ -71,6 +74,9 @@ class _RepoListState extends State<RepoList> {
   }
 
   void getRepos() async {
+    setState(() {
+      loading = true;
+    });
     String urlString = Url(this.widget.username).getRepos();
     var res = await http.get(Uri.encodeFull(urlString),
         headers: {"Accept": "application/json"});
