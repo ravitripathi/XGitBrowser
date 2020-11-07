@@ -11,7 +11,7 @@ class FollowingItemWidget extends StatelessWidget {
       width: 150.0,
       height: 150.0,
       child: Card(
-        color: isSelected ? Colors.blue : Colors.white,
+        color: isSelected ? Colors.blue : null,
         child: Column(
           children: [
             Container(
@@ -32,7 +32,7 @@ class FollowingItemWidget extends StatelessWidget {
             ),
             Text(
               item.login,
-              style: TextStyle(color: isSelected ? Colors.white : Colors.black),
+              style: TextStyle(color: isSelected ? Colors.white : null),
             ),
           ],
         ),
