@@ -25,30 +25,33 @@ class _FollowingListState extends State<FollowingList> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        child: ListView.builder(
-      // Let the ListView know how many items it needs to build.
-      itemCount: followingList.length,
-      scrollDirection: Axis.horizontal,
-      // Provide a builder function. This is where the magic happens.
-      // Convert each item into a widget based on the type of item it is.
-      itemBuilder: (context, index) {
-        final item = followingList[index];
+    return Stack(children: [
+      Center(child: loading ? CircularProgressIndicator() : null),
+      Container(
+          child: ListView.builder(
+        // Let the ListView know how many items it needs to build.
+        itemCount: followingList.length,
+        scrollDirection: Axis.horizontal,
+        // Provide a builder function. This is where the magic happens.
+        // Convert each item into a widget based on the type of item it is.
+        itemBuilder: (context, index) {
+          final item = followingList[index];
 
-        return GestureDetector(
-          child: FollowingItemWidget(
-            item: item,
-            isSelected: (item == selectedItem),
-          ),
-          onTap: () {
-            setState(() {
-              this.selectedItem = item;
-              widget.notifyParent(item.login);
-            });
-          },
-        );
-      },
-    ));
+          return GestureDetector(
+            child: FollowingItemWidget(
+              item: item,
+              isSelected: (item == selectedItem),
+            ),
+            onTap: () {
+              setState(() {
+                this.selectedItem = item;
+                widget.notifyParent(item.login);
+              });
+            },
+          );
+        },
+      )),
+    ]);
   }
 
   @override
@@ -73,6 +76,7 @@ class _FollowingListState extends State<FollowingList> {
   }
 
   void getFollowing() async {
+    loading = true;
     String urlString = Url(this.widget.username).getFollowing();
     var res = await http.get(Uri.encodeFull(urlString),
         headers: {"Accept": "application/json"});
