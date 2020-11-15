@@ -1,4 +1,6 @@
 import 'package:cross_git_browser/Url.dart';
+import 'package:cross_git_browser/Models/User.dart';
+import 'package:cross_git_browser/serializers.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:convert';
@@ -14,7 +16,7 @@ class ProfileHeader extends StatefulWidget {
 }
 
 class _ProfileHeaderState extends State<ProfileHeader> {
-  var resBody;
+  User user;
   bool loading = true;
   @override
   Widget build(BuildContext context) {
@@ -34,8 +36,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
               image: loading
                   ? null
                   : DecorationImage(
-                      image: NetworkImage(resBody['avatar_url']),
-                      fit: BoxFit.fill),
+                      image: NetworkImage(user.avatar_url), fit: BoxFit.fill),
             ),
           ),
           // Expanded(
@@ -45,7 +46,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                loading ? 'Loading' : resBody['name'],
+                loading ? 'Loading' : user.name,
                 style: GoogleFonts.roboto(
                   fontSize: 30.0,
                   fontWeight: FontWeight.bold,
@@ -76,12 +77,11 @@ class _ProfileHeaderState extends State<ProfileHeader> {
     String urlString = Url(this.widget.username).getURL();
     var res = await http.get(Uri.encodeFull(urlString),
         headers: {"Accept": "application/json"});
+    var resBody = json.decode(res.body);
+    final value = serializers.deserializeWith(User.serializer, resBody);
     setState(() {
-      resBody = json.decode(res.body);
+      user = value;
       loading = false;
     });
-
-    // Connector().get()
   }
-  // Future getUser(String y)
 }

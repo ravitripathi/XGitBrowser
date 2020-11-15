@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'RepoListModel.dart';
+import '../Models/RepoListModel.dart';
 
 class RepoItemWidget extends StatelessWidget {
   const RepoItemWidget({

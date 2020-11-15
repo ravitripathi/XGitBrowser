@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../Url.dart';
-import 'RepoListModel.dart';
+import '../Models/RepoListModel.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:cross_git_browser/serializers.dart';
 import 'RepoItemWidget.dart';
+import 'package:cross_git_browser/Utility/adaptive.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:adaptive_breakpoints/adaptive_breakpoints.dart';
 
 class RepoList extends StatefulWidget {
   final String username;
@@ -20,24 +24,31 @@ class _RepoListState extends State<RepoList> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isLargeScreen =
+        (getWindowType(context) >= AdaptiveWindowType.medium);
     return Stack(children: [
       Center(child: loading ? CircularProgressIndicator() : null),
       Container(
-          child: ListView.builder(
-        // Let the ListView know how many items it needs to build.
-        itemCount: repoList.length,
-        // Provide a builder function. This is where the magic happens.
-        // Convert each item into a widget based on the type of item it is.
-        itemBuilder: (context, index) {
-          final item = repoList[index];
-
-          return GestureDetector(
-              onTap: () {
-                openLink(item.html_url);
-              },
-              child: RepoItemWidget(item: item));
-        },
-      )),
+        child: loading
+            ? null
+            : StaggeredGridView.countBuilder(
+                itemCount: repoList.length,
+                crossAxisCount: isLargeScreen ? 4 : 2,
+                itemBuilder: (BuildContext context, int index) {
+                  final item = repoList[index];
+                  return GestureDetector(
+                    onTap: () {
+                      openLink(item.html_url);
+                    },
+                    child: RepoItemWidget(item: item),
+                  );
+                },
+                staggeredTileBuilder: (int index) {
+                  return StaggeredTile.fit(1);
+                },
+                mainAxisSpacing: 4.0,
+                crossAxisSpacing: 4.0),
+      ),
     ]);
   }
 
@@ -80,9 +91,12 @@ class _RepoListState extends State<RepoList> {
     String urlString = Url(this.widget.username).getRepos();
     var res = await http.get(Uri.encodeFull(urlString),
         headers: {"Accept": "application/json"});
+    var resBody = json.decode(res.body) as List;
     setState(() {
-      var resBody = json.decode(res.body) as List;
-      repoList = resBody.map((user) => RepoListModel.fromJson(user)).toList();
+      repoList = resBody
+          .map((user) =>
+              serializers.deserializeWith(RepoListModel.serializer, user))
+          .toList();
       print(res.body);
       loading = false;
     });
