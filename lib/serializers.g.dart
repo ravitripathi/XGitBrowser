@@ -8,6 +8,7 @@ part of serializers;
 
 Serializers _$serializers = (new Serializers().toBuilder()
       ..add(RepoListModel.serializer)
+      ..add(SearchResultModel.serializer)
       ..add(User.serializer))
     .build();
 

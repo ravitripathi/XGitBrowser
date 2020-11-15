@@ -19,6 +19,7 @@ class RepoItemWidget extends StatelessWidget {
             padding: const EdgeInsets.all(4.0),
             child: Card(
                 shadowColor: Colors.black87,
+                elevation: 7.0,
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Column(
@@ -29,8 +30,16 @@ class RepoItemWidget extends StatelessWidget {
                             fontSize: 18.0,
                             fontWeight: FontWeight.bold,
                           )),
+                      SizedBox(
+                        height: 4.0,
+                      ),
                       Text(item.description ?? "No Description"),
-                      Text("Language: ${item.language}"),
+                      SizedBox(
+                        height: 4.0,
+                      ),
+                      (item.language != null)
+                          ? Text("Language: ${item.language}")
+                          : Container(),
                     ],
                   ),
                 )),

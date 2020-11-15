@@ -22,4 +22,8 @@ class Url {
   String getRepos() {
     return getURL() + "/repos";
   }
+
+  String searchForRepo(String repoName) {
+    return "https://api.github.com/search/repositories?q=$repoName+user:$username";
+  }
 }

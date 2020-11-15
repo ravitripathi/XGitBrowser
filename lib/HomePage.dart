@@ -1,3 +1,4 @@
+import 'package:cross_git_browser/AllRepoPage.dart';
 import 'package:cross_git_browser/FollowingList/FollowingList.dart';
 import 'package:cross_git_browser/RepoList/RepoList.dart';
 import 'package:flutter/material.dart';
@@ -53,12 +54,34 @@ class _HomePageState extends State<HomePage> {
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  'Repos',
-                  style: GoogleFonts.roboto(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 25.0,
-                  ),
+                child: Row(
+                  children: [
+                    Text(
+                      'Repos',
+                      style: GoogleFonts.roboto(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 25.0,
+                      ),
+                    ),
+                    Spacer(),
+                    FlatButton(
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    AllRepoPage(selectedUsername)));
+                      },
+                      child: Text(
+                        'See All',
+                        style: GoogleFonts.roboto(
+                          fontWeight: FontWeight.w300,
+                          fontSize: 25.0,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
               Flexible(child: RepoList(selectedUsername)),

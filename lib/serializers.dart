@@ -10,6 +10,7 @@ import 'package:built_value/serializer.dart';
 import 'package:cross_git_browser/Models/RepoListModel.dart';
 import 'package:cross_git_browser/Models/User.dart';
 import 'package:built_value/standard_json_plugin.dart';
+import 'package:cross_git_browser/Models/SearchResultModel.dart';
 
 part 'serializers.g.dart';
 
@@ -27,6 +28,7 @@ part 'serializers.g.dart';
 @SerializersFor([
   User,
   RepoListModel,
+  SearchResultModel,
 ])
 final Serializers serializers =
     (_$serializers.toBuilder()..addPlugin(StandardJsonPlugin())).build();

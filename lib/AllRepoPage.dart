@@ -1,28 +1,47 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'Models/RepoListModel.dart';
+import 'package:adaptive_breakpoints/adaptive_breakpoints.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../Url.dart';
-import '../Models/RepoListModel.dart';
-import 'package:webview_flutter/webview_flutter.dart';
-import 'RepoItemWidget.dart';
+import 'Url.dart';
 import 'package:cross_git_browser/serializers.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:adaptive_breakpoints/adaptive_breakpoints.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+import 'RepoList/RepoItemWidget.dart';
+import 'package:flutter_search_bar/flutter_search_bar.dart';
+import 'Models/SearchResultModel.dart';
 
-class RepoList extends StatefulWidget {
+class AllRepoPage extends StatefulWidget {
   final String username;
-  RepoList(this.username);
+  AllRepoPage(this.username);
 
   @override
-  _RepoListState createState() => _RepoListState();
+  _AllRepoPageState createState() => _AllRepoPageState();
 }
 
-class _RepoListState extends State<RepoList> {
+class _AllRepoPageState extends State<AllRepoPage> {
   List<RepoListModel> repoList = [];
+  List<RepoListModel> tempList = [];
   bool loading = false;
+  SearchBar searchBar;
+  int page = 0;
+
+  AppBar buildAppBar(BuildContext context) {
+    final user = widget.username;
+    return new AppBar(
+        title: new Text("$user's repos"),
+        actions: [searchBar.getSearchAction(context)]);
+  }
 
   @override
   Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: searchBar.build(context),
+      body: gridWidget(),
+    );
+  }
+
+  Widget gridWidget() {
     final bool isLargeScreen =
         (getWindowType(context) >= AdaptiveWindowType.medium);
     return Stack(children: [
@@ -74,29 +93,62 @@ class _RepoListState extends State<RepoList> {
     super.initState();
     repoList = [];
     getRepos();
+    searchBar = new SearchBar(
+        inBar: false,
+        setState: setState,
+        onSubmitted: (value) => searchForRepo(value),
+        buildDefaultAppBar: buildAppBar);
   }
 
   @override
-  void didUpdateWidget(covariant RepoList oldWidget) {
+  void didUpdateWidget(covariant AllRepoPage oldWidget) {
     super.didUpdateWidget(oldWidget);
     repoList = [];
     getRepos();
   }
 
   void getRepos() async {
+    page++;
     setState(() {
       loading = true;
     });
     String urlString = Url(this.widget.username).getRepos();
+    urlString = urlString + "?page=$page";
     var res = await http.get(Uri.encodeFull(urlString),
         headers: {"Accept": "application/json"});
     var resBody = json.decode(res.body) as List;
     setState(() {
-      repoList = resBody
+      var receivedValue = resBody
           .map((user) =>
               serializers.deserializeWith(RepoListModel.serializer, user))
           .toList();
-      print(res.body);
+      repoList.addAll(receivedValue);
+      loading = false;
+    });
+  }
+
+  void searchForRepo(String name) async {
+    if (loading || name.isEmpty && name.length <= 2) {
+      setState(() {
+        repoList = tempList;
+        tempList = [];
+      });
+      return;
+    }
+    setState(() {
+      loading = true;
+    });
+    String urlString = Url(this.widget.username).searchForRepo(name);
+    var res = await http.get(Uri.encodeFull(urlString),
+        headers: {"Accept": "application/json"});
+    var resBody = json.decode(res.body) as List;
+    print(resBody);
+    tempList = repoList;
+    repoList = [];
+    setState(() {
+      var receivedValue =
+          serializers.deserializeWith(SearchResultModel.serializer, resBody);
+      repoList.addAll(receivedValue.items);
       loading = false;
     });
   }
