@@ -128,11 +128,14 @@ class _AllRepoPageState extends State<AllRepoPage> {
   }
 
   void searchForRepo(String name) async {
-    if (loading || name.isEmpty && name.length <= 2) {
+    if (loading || name.isEmpty) {
       setState(() {
         repoList = tempList;
         tempList = [];
       });
+      return;
+    }
+    if (name.length <= 2) {
       return;
     }
     setState(() {
@@ -141,13 +144,15 @@ class _AllRepoPageState extends State<AllRepoPage> {
     String urlString = Url(this.widget.username).searchForRepo(name);
     var res = await http.get(Uri.encodeFull(urlString),
         headers: {"Accept": "application/json"});
-    var resBody = json.decode(res.body) as List;
-    print(resBody);
+    var resBody = json.decode(res.body);
+    print(res.body);
     tempList = repoList;
     repoList = [];
     setState(() {
       var receivedValue =
           serializers.deserializeWith(SearchResultModel.serializer, resBody);
+      print("Printing values: ");
+      print(receivedValue.items);
       repoList.addAll(receivedValue.items);
       loading = false;
     });

@@ -96,7 +96,6 @@ class _RepoListState extends State<RepoList> {
           .map((user) =>
               serializers.deserializeWith(RepoListModel.serializer, user))
           .toList();
-      print(res.body);
       loading = false;
     });
   }

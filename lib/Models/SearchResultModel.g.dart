@@ -36,8 +36,8 @@ class _$SearchResultModelSerializer
       result
         ..add('items')
         ..add(serializers.serialize(object.items,
-            specifiedType:
-                const FullType(List, const [const FullType(RepoListModel)])));
+            specifiedType: const FullType(
+                BuiltList, const [const FullType(RepoListModel)])));
     }
     return result;
   }
@@ -63,10 +63,10 @@ class _$SearchResultModelSerializer
               specifiedType: const FullType(bool)) as bool;
           break;
         case 'items':
-          result.items = serializers.deserialize(value,
+          result.items.replace(serializers.deserialize(value,
                   specifiedType: const FullType(
-                      List, const [const FullType(RepoListModel)]))
-              as List<RepoListModel>;
+                      BuiltList, const [const FullType(RepoListModel)]))
+              as BuiltList<Object>);
           break;
       }
     }
@@ -81,7 +81,7 @@ class _$SearchResultModel extends SearchResultModel {
   @override
   final bool incomplete_results;
   @override
-  final List<RepoListModel> items;
+  final BuiltList<RepoListModel> items;
 
   factory _$SearchResultModel(
           [void Function(SearchResultModelBuilder) updates]) =>
@@ -137,9 +137,10 @@ class SearchResultModelBuilder
   set incomplete_results(bool incomplete_results) =>
       _$this._incomplete_results = incomplete_results;
 
-  List<RepoListModel> _items;
-  List<RepoListModel> get items => _$this._items;
-  set items(List<RepoListModel> items) => _$this._items = items;
+  ListBuilder<RepoListModel> _items;
+  ListBuilder<RepoListModel> get items =>
+      _$this._items ??= new ListBuilder<RepoListModel>();
+  set items(ListBuilder<RepoListModel> items) => _$this._items = items;
 
   SearchResultModelBuilder();
 
@@ -147,7 +148,7 @@ class SearchResultModelBuilder
     if (_$v != null) {
       _total_count = _$v.total_count;
       _incomplete_results = _$v.incomplete_results;
-      _items = _$v.items;
+      _items = _$v.items?.toBuilder();
       _$v = null;
     }
     return this;
@@ -168,11 +169,24 @@ class SearchResultModelBuilder
 
   @override
   _$SearchResultModel build() {
-    final _$result = _$v ??
-        new _$SearchResultModel._(
-            total_count: total_count,
-            incomplete_results: incomplete_results,
-            items: items);
+    _$SearchResultModel _$result;
+    try {
+      _$result = _$v ??
+          new _$SearchResultModel._(
+              total_count: total_count,
+              incomplete_results: incomplete_results,
+              items: _items?.build());
+    } catch (_) {
+      String _$failedField;
+      try {
+        _$failedField = 'items';
+        _items?.build();
+      } catch (e) {
+        throw new BuiltValueNestedFieldError(
+            'SearchResultModel', _$failedField, e.toString());
+      }
+      rethrow;
+    }
     replace(_$result);
     return _$result;
   }

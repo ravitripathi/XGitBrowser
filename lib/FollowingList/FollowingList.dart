@@ -10,7 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class FollowingList extends StatefulWidget {
   final String username;
   final Function(String) notifyParent;
-  String selectedUsername;
+  final String selectedUsername;
   FollowingList(this.username, this.notifyParent, this.selectedUsername);
 
   @override
@@ -84,7 +84,6 @@ class _FollowingListState extends State<FollowingList> {
       var resBody = json.decode(res.body) as List;
       followingList =
           resBody.map((user) => FollowingListModel.fromJson(user)).toList();
-      print(res.body);
       loading = false;
     });
 

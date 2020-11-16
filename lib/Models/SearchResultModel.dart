@@ -1,6 +1,9 @@
+import 'package:built_collection/built_collection.dart';
 import 'package:built_value/built_value.dart';
+import 'package:built_value/json_object.dart';
 import 'package:built_value/serializer.dart';
 import 'package:cross_git_browser/Models/RepoListModel.dart';
+import 'package:cross_git_browser/RepoList/RepoList.dart';
 
 part 'SearchResultModel.g.dart';
 
@@ -16,7 +19,7 @@ abstract class SearchResultModel
   bool get incomplete_results;
 
   @nullable
-  List<RepoListModel> get items;
+  BuiltList<RepoListModel> get items;
 
   SearchResultModel._();
 
