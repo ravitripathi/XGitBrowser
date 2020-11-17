@@ -80,14 +80,14 @@ class _FollowingListState extends State<FollowingList> {
     String urlString = Url(this.widget.username).getFollowing();
     var res = await http.get(Uri.encodeFull(urlString),
         headers: {"Accept": "application/json"});
-    setState(() {
-      var resBody = json.decode(res.body) as List;
-      followingList =
-          resBody.map((user) => FollowingListModel.fromJson(user)).toList();
-      loading = false;
-    });
-
-    // Connector().get()
+    if (res.statusCode == 200) {
+      setState(() {
+        var resBody = json.decode(res.body) as List;
+        followingList =
+            resBody.map((user) => FollowingListModel.fromJson(user)).toList();
+        loading = false;
+      });
+    }
   }
 
   Future<String> getUsername() async {

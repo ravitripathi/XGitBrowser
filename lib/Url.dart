@@ -19,8 +19,8 @@ class Url {
     return getURL() + "/following";
   }
 
-  String getRepos() {
-    return getURL() + "/repos";
+  String getRepos({int page = 1, int perPage = 10}) {
+    return getURL() + "/repos?page=$page&per_page=$perPage";
   }
 
   String searchForRepo(String repoName) {

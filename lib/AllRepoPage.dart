@@ -20,9 +20,11 @@ class AllRepoPage extends StatefulWidget {
 }
 
 class _AllRepoPageState extends State<AllRepoPage> {
+  ScrollController controller;
   List<RepoListModel> repoList = [];
   List<RepoListModel> tempList = [];
   bool loading = false;
+  bool incrementalLoading = false;
   SearchBar searchBar;
   int page = 0;
 
@@ -37,37 +39,57 @@ class _AllRepoPageState extends State<AllRepoPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: searchBar.build(context),
-      body: gridWidget(),
+      body: Stack(children: [
+        Center(child: loading ? CircularProgressIndicator() : null),
+        Container(
+            child: loading
+                ? null
+                : Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Flexible(
+                        child: gridWidget(),
+                      ),
+                      SafeArea(
+                        bottom: true,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              child: incrementalLoading
+                                  ? CircularProgressIndicator()
+                                  : null,
+                            )
+                          ],
+                        ),
+                      )
+                    ],
+                  )),
+      ]),
     );
   }
 
   Widget gridWidget() {
     final bool isLargeScreen =
         (getWindowType(context) >= AdaptiveWindowType.medium);
-    return Stack(children: [
-      Center(child: loading ? CircularProgressIndicator() : null),
-      Container(
-        child: loading
-            ? null
-            : StaggeredGridView.countBuilder(
-                itemCount: repoList.length,
-                crossAxisCount: isLargeScreen ? 4 : 2,
-                itemBuilder: (BuildContext context, int index) {
-                  final item = repoList[index];
-                  return GestureDetector(
-                    onTap: () {
-                      openLink(item.html_url);
-                    },
-                    child: RepoItemWidget(item: item),
-                  );
-                },
-                staggeredTileBuilder: (int index) {
-                  return StaggeredTile.fit(1);
-                },
-                mainAxisSpacing: 4.0,
-                crossAxisSpacing: 4.0),
-      ),
-    ]);
+    return StaggeredGridView.countBuilder(
+        controller: controller,
+        itemCount: repoList.length,
+        crossAxisCount: isLargeScreen ? 4 : 2,
+        itemBuilder: (BuildContext context, int index) {
+          final item = repoList[index];
+          return GestureDetector(
+            onTap: () {
+              openLink(item.html_url);
+            },
+            child: RepoItemWidget(item: item),
+          );
+        },
+        staggeredTileBuilder: (int index) {
+          return StaggeredTile.fit(1);
+        },
+        mainAxisSpacing: 4.0,
+        crossAxisSpacing: 4.0);
   }
 
   void openLink(String urlString) {
@@ -98,6 +120,23 @@ class _AllRepoPageState extends State<AllRepoPage> {
         setState: setState,
         onSubmitted: (value) => searchForRepo(value),
         buildDefaultAppBar: buildAppBar);
+    controller = new ScrollController()..addListener(_scrollListener);
+  }
+
+  void _scrollListener() {
+    //Regarding extentAfter. It approaches zero as you reach the bottom of your list or grid
+    //It zero at the last item(s)
+    // print(controller.position.extentAfter);
+    if (controller.position.extentAfter < 100) {
+      //When the extent approaches 100, fetch other rows
+      getRepos();
+    }
+  }
+
+  @override
+  void dispose() {
+    controller.removeListener(_scrollListener);
+    super.dispose();
   }
 
   @override
@@ -110,10 +149,10 @@ class _AllRepoPageState extends State<AllRepoPage> {
   void getRepos() async {
     page++;
     setState(() {
-      loading = true;
+      incrementalLoading = true;
     });
-    String urlString = Url(this.widget.username).getRepos();
-    urlString = urlString + "?page=$page";
+    String urlString =
+        Url(this.widget.username).getRepos(page: page, perPage: 40);
     var res = await http.get(Uri.encodeFull(urlString),
         headers: {"Accept": "application/json"});
     var resBody = json.decode(res.body) as List;
@@ -123,7 +162,7 @@ class _AllRepoPageState extends State<AllRepoPage> {
               serializers.deserializeWith(RepoListModel.serializer, user))
           .toList();
       repoList.addAll(receivedValue);
-      loading = false;
+      incrementalLoading = false;
     });
   }
 
@@ -151,8 +190,6 @@ class _AllRepoPageState extends State<AllRepoPage> {
     setState(() {
       var receivedValue =
           serializers.deserializeWith(SearchResultModel.serializer, resBody);
-      print("Printing values: ");
-      print(receivedValue.items);
       repoList.addAll(receivedValue.items);
       loading = false;
     });

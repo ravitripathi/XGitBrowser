@@ -90,13 +90,17 @@ class _RepoListState extends State<RepoList> {
     String urlString = Url(this.widget.username).getRepos();
     var res = await http.get(Uri.encodeFull(urlString),
         headers: {"Accept": "application/json"});
-    var resBody = json.decode(res.body) as List;
-    setState(() {
-      repoList = resBody
-          .map((user) =>
-              serializers.deserializeWith(RepoListModel.serializer, user))
-          .toList();
-      loading = false;
-    });
+    if (res.statusCode == 200) {
+      var resBody = json.decode(res.body) as List;
+      setState(() {
+        repoList = resBody
+            .map((user) =>
+                serializers.deserializeWith(RepoListModel.serializer, user))
+            .toList();
+        loading = false;
+      });
+    } else {
+      print(res.body);
+    }
   }
 }

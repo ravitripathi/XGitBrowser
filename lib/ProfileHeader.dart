@@ -78,10 +78,12 @@ class _ProfileHeaderState extends State<ProfileHeader> {
     var res = await http.get(Uri.encodeFull(urlString),
         headers: {"Accept": "application/json"});
     var resBody = json.decode(res.body);
-    final value = serializers.deserializeWith(User.serializer, resBody);
-    setState(() {
-      user = value;
-      loading = false;
-    });
+    if (res.statusCode == 200) {
+      final value = serializers.deserializeWith(User.serializer, resBody);
+      setState(() {
+        user = value;
+        loading = false;
+      });
+    }
   }
 }
