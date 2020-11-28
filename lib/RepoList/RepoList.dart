@@ -1,13 +1,14 @@
-import 'package:flutter/material.dart';
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import '../Url.dart';
-import '../Models/RepoListModel.dart';
-import 'package:webview_flutter/webview_flutter.dart';
-import 'RepoItemWidget.dart';
-import 'package:cross_git_browser/serializers.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+
 import 'package:adaptive_breakpoints/adaptive_breakpoints.dart';
+import 'package:cross_git_browser/serializers.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+
+import '../Models/RepoListModel.dart';
+import '../Url.dart';
+import 'RepoItemWidget.dart';
 
 class RepoList extends StatefulWidget {
   final String username;
@@ -88,19 +89,23 @@ class _RepoListState extends State<RepoList> {
       loading = true;
     });
     String urlString = Url(this.widget.username).getRepos();
-    var res = await http.get(Uri.encodeFull(urlString),
-        headers: {"Accept": "application/json"});
+    var res = await Network.getDataFor(urlString, context);
     if (res.statusCode == 200) {
       var resBody = json.decode(res.body) as List;
+      var deserializedResp = resBody
+          .map((user) =>
+              serializers.deserializeWith(RepoListModel.serializer, user))
+          .toList();
       setState(() {
-        repoList = resBody
-            .map((user) =>
-                serializers.deserializeWith(RepoListModel.serializer, user))
-            .toList();
+        if (deserializedResp.length > 0) {
+          repoList = deserializedResp;
+        }
         loading = false;
       });
     } else {
-      print(res.body);
+      setState(() {
+        loading = false;
+      });
     }
   }
 }

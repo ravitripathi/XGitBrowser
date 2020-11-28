@@ -1,11 +1,12 @@
-import 'FollowingListModel.dart';
-import 'FollowingItemWidget.dart';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import '../Url.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../Url.dart';
+import 'FollowingItemWidget.dart';
+import 'FollowingListModel.dart';
 
 class FollowingList extends StatefulWidget {
   final String username;
@@ -78,13 +79,16 @@ class _FollowingListState extends State<FollowingList> {
   void getFollowing() async {
     loading = true;
     String urlString = Url(this.widget.username).getFollowing();
-    var res = await http.get(Uri.encodeFull(urlString),
-        headers: {"Accept": "application/json"});
+    var res = await Network.getDataFor(urlString, context);
     if (res.statusCode == 200) {
       setState(() {
         var resBody = json.decode(res.body) as List;
         followingList =
             resBody.map((user) => FollowingListModel.fromJson(user)).toList();
+        loading = false;
+      });
+    } else {
+      setState(() {
         loading = false;
       });
     }

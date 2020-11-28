@@ -1,15 +1,17 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'Models/RepoListModel.dart';
-import 'package:adaptive_breakpoints/adaptive_breakpoints.dart';
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'Url.dart';
+
+import 'package:adaptive_breakpoints/adaptive_breakpoints.dart';
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:cross_git_browser/serializers.dart';
-import 'package:webview_flutter/webview_flutter.dart';
-import 'RepoList/RepoItemWidget.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_search_bar/flutter_search_bar.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+
+import 'Models/RepoListModel.dart';
 import 'Models/SearchResultModel.dart';
+import 'RepoList/RepoItemWidget.dart';
+import 'Url.dart';
 
 class AllRepoPage extends StatefulWidget {
   final String username;
@@ -153,8 +155,7 @@ class _AllRepoPageState extends State<AllRepoPage> {
     });
     String urlString =
         Url(this.widget.username).getRepos(page: page, perPage: 40);
-    var res = await http.get(Uri.encodeFull(urlString),
-        headers: {"Accept": "application/json"});
+    var res = await Network.getDataFor(urlString, context);
     var resBody = json.decode(res.body) as List;
     setState(() {
       var receivedValue = resBody
@@ -181,17 +182,29 @@ class _AllRepoPageState extends State<AllRepoPage> {
       loading = true;
     });
     String urlString = Url(this.widget.username).searchForRepo(name);
-    var res = await http.get(Uri.encodeFull(urlString),
-        headers: {"Accept": "application/json"});
+    var res = await Network.getDataFor(urlString, context);
     var resBody = json.decode(res.body);
-    print(res.body);
     tempList = repoList;
-    repoList = [];
-    setState(() {
-      var receivedValue =
-          serializers.deserializeWith(SearchResultModel.serializer, resBody);
-      repoList.addAll(receivedValue.items);
-      loading = false;
-    });
+    var receivedValue =
+        serializers.deserializeWith(SearchResultModel.serializer, resBody);
+    if (receivedValue.items.length > 0) {
+      repoList = [];
+      setState(() {
+        repoList.addAll(receivedValue.items);
+        loading = false;
+      });
+    } else {
+      setState(() {
+        loading = false;
+      });
+      AwesomeDialog(
+        context: context,
+        dialogType: DialogType.INFO,
+        animType: AnimType.SCALE,
+        title: "No results",
+        desc:
+            "There seem to be no repos by this user matching your entered term",
+      ).show();
+    }
   }
 }
