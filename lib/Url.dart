@@ -50,12 +50,12 @@ class Network {
 }
 
 class Url {
-  final String end_point = "https://api.github.com/users/";
+  final String endPoint = "https://api.github.com/users/";
   final String username;
   Url(this.username);
 
   String getURL() {
-    return end_point + username;
+    return endPoint + username;
   }
 
   String getGistURL() {

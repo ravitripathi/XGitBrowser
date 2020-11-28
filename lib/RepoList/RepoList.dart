@@ -4,7 +4,6 @@ import 'package:adaptive_breakpoints/adaptive_breakpoints.dart';
 import 'package:cross_git_browser/serializers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 
 import '../Models/RepoListModel.dart';
 import '../Url.dart';
@@ -36,12 +35,7 @@ class _RepoListState extends State<RepoList> {
                 crossAxisCount: isLargeScreen ? 4 : 2,
                 itemBuilder: (BuildContext context, int index) {
                   final item = repoList[index];
-                  return GestureDetector(
-                    onTap: () {
-                      openLink(item.html_url);
-                    },
-                    child: RepoItemWidget(item: item),
-                  );
+                  return RepoItemWidget(item: item);
                 },
                 staggeredTileBuilder: (int index) {
                   return StaggeredTile.fit(1);
@@ -50,24 +44,6 @@ class _RepoListState extends State<RepoList> {
                 crossAxisSpacing: 4.0),
       ),
     ]);
-  }
-
-  void openLink(String urlString) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => Scaffold(
-          appBar: AppBar(
-            title: Text("XGitBrowser"),
-          ),
-          body: SafeArea(
-            child: WebView(
-              initialUrl: urlString,
-            ),
-          ),
-        ),
-      ),
-    );
   }
 
   @override
